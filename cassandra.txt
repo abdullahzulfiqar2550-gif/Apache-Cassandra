@@ -1,0 +1,155 @@
+##/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+##brew install openjdk@17
+##echo 'export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+##brew install cassandra
+##cassandra --version
+##brew services start cassandra
+##cqlsh
+
+
+##Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+##choco install jdk8 -y
+##choco install python2 -y
+##choco install cassandra -y
+##net start cassandra
+##cqlsh
+
+
+
+##Creating & Using KEYSPACE
+CREATE KEYSPACE startup WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+USE startup;
+
+##Creating Table
+CREATE TABLE employee (
+    emp_id UUID PRIMARY KEY,
+    name TEXT,
+    department TEXT,
+    age INT);
+
+CREATE TABLE salary (
+    emp_id UUID,
+    month TEXT,
+    amount FLOAT,
+    PRIMARY KEY (emp_id, month));
+
+##Inserting in tables
+INSERT INTO employees (emp_id, name, department) VALUES (uuid(), 'Abdullah', 'Engineering');
+INSERT INTO employees (emp_id, name, department) VALUES (uuid(), 'Samran ', 'HR');
+INSERT INTO employees (emp_id, name, department) VALUES (uuid(), 'Bilal', 'Finance');
+
+SELECT emp_id, name FROM employee; # (Getting UUID)
+
+INSERT INTO salary (emp_id, month, amount) VALUES (beb7c0fa-040c-48b9-878a-f43b690e7591 , 'Jan-2024', 75000);
+INSERT INTO salary (emp_id, month, amount) VALUES (8845f9b7-647e-4ccf-af61-12a993b5b153, 'Feb-2024', 75000);
+INSERT INTO salary (emp_id, month, amount) VALUES (6559ceab-af13-4234-9dd8-9b3b0f3be818, 'Mar-2024', 80000);
+
+##Reading data
+SELECT * FROM employee;
+SELECT name, department FROM employee;
+SELECT * FROM salary WHERE emp_id = emp-uuid;
+SELECT * FROM employee WHERE department = 'HR' ALLOW FILTERING;
+
+##Updating data
+UPDATE employee SET age = 29 WHERE emp_id = emp-uuid;
+UPDATE salary SET amount = 85000 WHERE emp_id = emp-uuid AND month = 'Mar-2024';
+
+##Deleting data
+DELETE age FROM employee WHERE emp_id = emp-uuid;
+DELETE FROM employee WHERE emp_id = emp-uuid;
+
+TRUNCATE salary;
+
+DROP TABLE IF EXISTS salary;
+DROP TABLE IF EXISTS employee;
+DROP KEYSPACE IF EXISTS company;
+
+##Primary_Key
+##Partition Key only (emp_id decides which node stores the row)
+CREATE TABLE employees (
+    emp_id UUID PRIMARY KEY,
+    name TEXT,
+    department TEXT);
+
+##Partition Key + Clustering Key (emp_id = partition, month = sort order)
+CREATE TABLE salaryy (
+    emp_id UUID,
+    month TEXT,
+    amount FLOAT,
+    PRIMARY KEY (emp_id, month));
+
+##Composite Partition Key (data spread across nodes by dept + year)
+CREATE TABLE salary_by_dept (
+    department TEXT,
+    year INT,
+    emp_id UUID,
+    amount FLOAT,
+    PRIMARY KEY ((department, year), emp_id));
+
+##DataTypes
+CREATE TABLE employeees (
+    emp_id UUID PRIMARY KEY,
+    name TEXT,
+    age INT,
+    salary FLOAT,
+    is_active BOOLEAN,
+    joined_on DATE,
+    last_login TIMESTAMP);
+
+##Index
+CREATE INDEX ON employees (department);
+SELECT * FROM employee WHERE department = 'Finance';
+
+DESCRIBE TABLE employee;
+DROP INDEX IF EXISTS employees_department_idx;
+
+
+##Collections-List
+CREATE TABLE employee_skills (
+    emp_id UUID PRIMARY KEY,
+    skills LIST<TEXT>);
+
+INSERT INTO employee_skills (emp_id, skills) VALUES (uuid(), ['Java', 'Python', 'Cassandra']);
+UPDATE employee_skills SET skills = skills + ['Kafka'] WHERE emp_id = adc2ce02-4139-497b-8ac5-69d772baed20;
+
+
+####Collections-Set
+CREATE TABLE employee_certs (
+    emp_id UUID PRIMARY KEY,
+    certifications SET<TEXT>);
+
+INSERT INTO employee_certs (emp_id, certifications) VALUES (uuid(), {'AWS', 'GCP', 'Azure'});
+UPDATE employee_certs SET certifications = certifications + {'SQL'} WHERE emp_id = 1bdfea69-ceee-4fc5-9ab8-314197744998;
+
+##Collections-Map
+CREATE TABLE employee_contacts (
+    emp_id UUID PRIMARY KEY,
+    contact MAP<TEXT, TEXT>);
+
+INSERT INTO employee_contacts (emp_id, contact) VALUES (uuid(), {'email': 'xyz@company.com', 'phone': '0345-7654210'});
+UPDATE employee_contacts SET contact['phone'] = '99999999999' WHERE emp_id = 015c311c-6395-4e30-b349-59feef84fe30;
+
+##TTL
+##Row auto-deletes after 60 seconds
+INSERT INTO salaryy (emp_id, month, amount)
+VALUES (uuid(), 'Jan-2024', 50000)
+USING TTL 60;
+
+SELECT TTL(amount) FROM salaryy WHERE emp_id = 712e434b-cee3-4b8d-8b90-d81219ec5865 AND month = 'Jan-2024';
+
+
+##Replication — SimpleStrategy vs NetworkTopologyStrategy
+CREATE KEYSPACE company
+WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+
+CREATE KEYSPACE company_prod
+WITH replication = {'class': 'NetworkTopologyStrategy', 'DC1': 3, 'DC2': 2};
+
+
+##Consistency levels : CONSIST  ENCY ONE, CONSISTENCY QUORUM & CONSISTENCY ALL
+##COMPACTION & TOMBSTONES
+
+
+
+
